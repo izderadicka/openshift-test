@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+import os
 virtenv = os.environ['OPENSHIFT_PYTHON_DIR'] + '/virtenv/'
 virtualenv = os.path.join(virtenv, 'bin/activate_this.py')
 try:
@@ -15,7 +15,6 @@ try:
 except IOError:
   pass
 
-import os
 
 from flaskapp import app as application
 #
