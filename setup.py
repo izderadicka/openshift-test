@@ -13,7 +13,7 @@ class InitDbCommand(Command):
 
     def run(self):
         #init virtualenv
-        virtenv = os.environ['OPENSHIFT_PYTHON_DIR'] + '/virtenv/' if os.environ.get('OPENSHIFT_PYTHON_DIR') \
+        virtenv = os.environ['VIRTUAL_ENV']  if os.environ.get('VIRTUAL_ENV') \
         else os.path.dirname(__file__)
         virtualenv = os.path.join(virtenv, 'bin/activate_this.py')
         exec(compile(open(virtualenv, 'rb').read(), virtualenv, 'exec'), dict(__file__=virtualenv)) 
