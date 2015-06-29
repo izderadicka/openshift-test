@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{%block title%}Random Thoughts{%endblock%}
+{%block content%}
+{%if errors%}
+<div class="alert alert-danger alert-dismissible" role="alert">
+<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+  <span aria-hidden="true">&times;</span>
+</button>
+{{errors | safe}}
+</div>
+{%else%}
+<div class="well">
+Share random thoughts about anything
+</div>
+{%endif%}
+<form method="POST" target="/" id="main-form">
+
+<input class="form-control" type="text" name="name" placeholder="Your Name" value="{{name}}"/>
+
+<textarea class="form-control" name="thought" placeholder="Your Thoughts" rows="5"></textarea>
+<input type="submit" class="btn btn-primary" value='Share Thought'>
+</form>
+
+<div class="list-group thoughts">
+{% for t in thoughts %}
+<div class="list-group-item">
+<h4 class="thought-header">By {{t.name}} before {{t.created|fromnow}}</h4>
+<p class="thought-text">{{t.text}}</p>
+</div>
+{%endfor%}
+</div>
+
+{%endblock%}

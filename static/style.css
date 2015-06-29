@@ -1,0 +1,16 @@
+.thoughts {
+  margin-top: 3em;
+}
+
+.thought-header {
+  font-weight: bold;
+}
+
+#main-form .form-control {
+  margin-bottom: 5px;
+}
+
+.search {
+  width: 18em !important;
+  height: 30px;
+}
