@@ -45,7 +45,7 @@ app.jinja_env.filters['fromnow'] = format_fromnow
 def root():
     errors=[]
     name=request.cookies.get('name','')
-    search=request.args.get('q')
+    search=request.args.get('q','')
     if search:
         filter=[Thought.text.ilike('%'+t+'%') for t in search.split()]
         thoughts=Thought.query.filter(*filter)
@@ -66,7 +66,7 @@ def root():
             db.session.commit()
         
     resp = make_response(render_template('index.html', errors='<br>\n'.join(errors), 
-                                         thoughts=thoughts, name=name))  
+                                         thoughts=thoughts, name=name, search=search))  
     if name and request.method=='POST':
         resp.set_cookie('name', name, max_age=315360000)  
     return resp
