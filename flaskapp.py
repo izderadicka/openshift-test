@@ -13,7 +13,7 @@ app = Flask(__name__)
 app.config['DEBUG']= os.environ.get('FLASK_DEBUG')
 
 
-mongo_uri=os.environ.get('OPENSHIFT_MONGODB_DB_URL', 'mongodb://localhost/test')
+mongo_uri=os.environ.get('OPENSHIFT_MONGODB_DB_URL', 'mongodb://localhost')+'/test'
 app.config['MONGO_URI'] = mongo_uri
 
 mongo=PyMongo(app)
