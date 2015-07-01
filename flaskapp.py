@@ -1,32 +1,26 @@
 
 import flask
 from flask import request, Flask, render_template, make_response
-from flask.ext.sqlalchemy import SQLAlchemy
+from flask.ext.pymongo import PyMongo  # @UnresolvedImport
 
 import sys
 import os
 import datetime
 from babel.dates import format_timedelta
+import pymongo
 
 app = Flask(__name__)
 app.config['DEBUG']= os.environ.get('FLASK_DEBUG')
 
 
-db_host=os.environ.get('OPENSHIFT_POSTGRESQL_DB_HOST', 'localhost')
-db_port=int(os.environ.get('OPENSHIFT_POSTGRESQL_DB_PORT', 5432))
-db_user=os.environ.get('OPENSHIFT_POSTGRESQL_DB_USERNAME', 'ivan')
-db_pwd=os.environ.get('OPENSHIFT_POSTGRESQL_DB_PASSWORD', '')
-db_db=os.environ.get('PGDATABASE', 'testbase')
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://%s:%s@%s:%d/%s' %(db_user, db_pwd,db_host,db_port,db_db)
+mongo_uri=os.environ.get('OPENSHIFT_MONGODB_DB_URL', 'mongodb://localhost/test')
+app.config['MONGO_URI'] = mongo_uri
 
-db=SQLAlchemy(app)
+mongo=PyMongo(app)
 
-class Thought(db.Model):
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    name = db.Column(db.String(80), index=True)
-    text = db.Column(db.String(1000))
-    created = db.Column(db.DateTime, index=True, default=lambda: datetime.datetime.now())
-    
+with app.app_context():
+    mongo.db.thoughts.ensure_index([('text', pymongo.TEXT)])
+    mongo.db.thoughts.ensure_index([('created', pymongo.DESCENDING)])
 
 def format_datetime(value):
     if isinstance(value, datetime.datetime):
@@ -35,7 +29,7 @@ def format_datetime(value):
 
 def format_fromnow(value):
     if isinstance(value, datetime.datetime):
-        return format_timedelta(datetime.datetime.now()-value, locale='en_US')
+        return format_timedelta(datetime.datetime.now(value.tzinfo)-value, locale='en_US')
     return  value
 
 app.jinja_env.filters['datetime'] = format_datetime
@@ -47,11 +41,12 @@ def root():
     name=request.cookies.get('name','')
     search=request.args.get('q','')
     if search:
-        filter=[Thought.text.ilike('%'+t+'%') for t in search.split()]
-        thoughts=Thought.query.filter(*filter)
+        filter =' '.join(['"'+t+'"' for t in search.split()])
+        thoughts=map(lambda r: r['obj'], mongo.db.command('text', 'thoughts', search=filter, limit=100)['results'])
+        
     else:
-        thoughts=Thought.query
-    thoughts=thoughts.order_by(Thought.created.desc()).limit(100)
+        thoughts=mongo.db.thoughts.find()
+        thoughts=thoughts.sort('created', pymongo.DESCENDING).limit(100)
     if request.method=='POST':
         name=request.form['name']
         text=request.form['thought']
@@ -60,10 +55,12 @@ def root():
             errors.append('Name is mandatory')
         if not text:
             errors.append('Thought is mandatory')
+        if len(name)>80:
+            errors.append('Name is max 80 chars')
+        if len(text)>2000:
+            errors.append('Though is max 2000 chars')
         if not errors:    
-            t=Thought(name=name,text=text)
-            db.session.add(t)
-            db.session.commit()
+            mongo.db.thoughts.insert({'name':name, 'text':text, 'created':datetime.datetime.utcnow()})
         
     resp = make_response(render_template('index.html', errors='<br>\n'.join(errors), 
                                          thoughts=thoughts, name=name, search=search))  
