@@ -56,7 +56,9 @@ def root():
             errors.append('Though is max 2000 chars')
         if not errors:    
             mongo.db.thoughts.insert({'name':name, 'text':text, 'created':datetime.datetime.utcnow()})
-            return redirect('/')
+            response=make_response(redirect('/'))
+            response.set_cookie('name', name, max_age=315360000)
+            return response
             
     name=request.cookies.get('name','')
     search=request.args.get('q','')
@@ -71,8 +73,6 @@ def root():
         
     resp = make_response(render_template('index.html', errors='<br>\n'.join(errors), 
                                          thoughts=thoughts, name=name, search=search))  
-    if name and request.method=='POST':
-        resp.set_cookie('name', name, max_age=315360000)  
     return resp
         
     
