@@ -1,6 +1,6 @@
 
 import flask
-from flask import request, Flask, render_template, make_response
+from flask import request, Flask, render_template, make_response, redirect
 from flask.ext.pymongo import PyMongo  # @UnresolvedImport
 
 import sys
@@ -41,15 +41,7 @@ app.jinja_env.filters['fromnow'] = format_fromnow
 @app.route('/', methods=["GET","POST"])
 def root():
     errors=[]
-    name=request.cookies.get('name','')
-    search=request.args.get('q','')
-    if search:
-        filter =' '.join(['"'+t+'"' for t in search.split()])
-        thoughts=map(lambda r: r['obj'], mongo.db.command('text', 'thoughts', search=filter, limit=100)['results'])
-        
-    else:
-        thoughts=mongo.db.thoughts.find()
-        thoughts=thoughts.sort('created', pymongo.DESCENDING).limit(100)
+    
     if request.method=='POST':
         name=request.form['name']
         text=request.form['thought']
@@ -64,6 +56,18 @@ def root():
             errors.append('Though is max 2000 chars')
         if not errors:    
             mongo.db.thoughts.insert({'name':name, 'text':text, 'created':datetime.datetime.utcnow()})
+            return redirect('/')
+            
+    name=request.cookies.get('name','')
+    search=request.args.get('q','')
+    if search:
+        filter =' '.join(['"'+t+'"' for t in search.split()])
+        thoughts=map(lambda r: r['obj'], mongo.db.command('text', 'thoughts', search=filter, limit=100)['results'])
+        
+    else:
+        thoughts=mongo.db.thoughts.find()
+        thoughts=thoughts.sort('created', pymongo.DESCENDING).limit(100)
+    
         
     resp = make_response(render_template('index.html', errors='<br>\n'.join(errors), 
                                          thoughts=thoughts, name=name, search=search))  
