@@ -1,0 +1,2 @@
+#!/bin/bash
+grep -q '^setParameter = textSearchEnabled=true' /etc/mongodb.conf || echo -e '\nsetParameter = textSearchEnabled=trueq' >> /etc/mongodb.conf
