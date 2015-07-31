@@ -14,8 +14,8 @@ app.config['DEBUG']= os.environ.get('FLASK_DEBUG')
 
 
 app.config['MONGO_HOST'] = os.environ.get('OPENSHIFT_MONGODB_DB_HOST', 'localhost')
-app.config['MONGO_PORT'] = os.environ.get('OPENSHIFT_MONGODB_DB_PORT', 27017)
-app.config['MONGO_DBNAME'] = 'testpy'
+exit
+app.config['MONGO_DBNAME'] = os.environ.get('OPENSHIFT_APP_NAME', 'testpy')
 app.config['MONGO_USERNAME'] = os.environ.get('OPENSHIFT_MONGODB_DB_USERNAME')
 app.config['MONGO_PASSWORD'] = os.environ.get('OPENSHIFT_MONGODB_DB_PASSWORD')
 
