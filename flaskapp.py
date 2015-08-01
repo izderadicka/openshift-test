@@ -12,11 +12,7 @@ import pymongo
 app = Flask(__name__)
 app.config['DEBUG']= os.environ.get('FLASK_DEBUG')
 
-
-app.config['MONGO_HOST'] = os.environ.get('OPENSHIFT_MONGODB_DB_HOST', 'localhost')
-app.config['MONGO_DBNAME'] = os.environ.get('OPENSHIFT_APP_NAME', 'testpy')
-app.config['MONGO_USERNAME'] = os.environ.get('OPENSHIFT_MONGODB_DB_USERNAME')
-app.config['MONGO_PASSWORD'] = os.environ.get('OPENSHIFT_MONGODB_DB_PASSWORD')
+app.config['MONGO_URI'] = os.environ.get('MONGOLAB_URI', 'mongodb://localhost/test')
 
 mongo=PyMongo(app)
 
