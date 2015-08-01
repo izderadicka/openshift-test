@@ -1,2 +1,0 @@
-#!/bin/bash
-grep -q '^setParameter = textSearchEnabled=true' $OPENSHIFT_MONGODB_DIR/conf/mongodb.conf || echo -e '\nsetParameter = textSearchEnabled=true' >> $OPENSHIFT_MONGODB_DIR/conf/mongodb.conf
